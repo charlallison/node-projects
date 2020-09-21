@@ -1,4 +1,3 @@
-const chalk = require('chalk')
 const fs = require('fs')
 const yargs = require('yargs')
 const notes = require('./notes')
@@ -23,7 +22,7 @@ yargs.command({
         }
     },
     handler: function(argv) {
-        console.log(chalk.red.inverse(argv.title) + '\n' + argv.body)
+        // console.log(chalk.red.inverse(argv.title) + '\n' + argv.body)
         notes.addNote(argv.title, argv.body);
     }
 })
@@ -32,8 +31,16 @@ yargs.command({
 yargs.command({
     command: 'remove',
     describe: 'Remove a note',
-    handler: function() {
-        console.log('Removing a note titled ')
+    builder: {
+        title: {
+            describe: 'Note to remove',
+            demandOption: true,
+            type: 'string'
+        }
+    },
+    handler: function(argv) {
+        // console.log('Removing a note titled ')
+        notes.removeNote(argv.title)
     }
 })
 

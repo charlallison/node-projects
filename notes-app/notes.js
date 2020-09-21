@@ -1,4 +1,5 @@
 const fs = require('fs')
+const chalk = require('chalk')
 
 const getNotes = function() {
     return 'My Notes'
@@ -6,12 +7,24 @@ const getNotes = function() {
 
 const addNote = function(title, body)  {
     const notes = loadNotes()
-    notes.push({
-        title: title,
-        body: body
+
+    const duplicatNotes = notes.filter(function(note) {
+        return title === note.title
     })
 
-    saveNotes(notes)
+    if(duplicatNotes.length === 0) {
+        notes.push({
+            title: title,
+            body: body
+        })
+        saveNotes(notes)
+    } else {
+        console.log(chalk.red.bold('Error: Note title already taken'))
+    }
+}
+
+const removeNote = function(title) {
+    console.log('Note to be removed: ' + title)
 }
 
 const saveNotes = function(notes) {
@@ -30,5 +43,6 @@ const loadNotes = function() {
 
 module.exports = {
     getNotes: getNotes,
-    addNote: addNote
+    addNote: addNote,
+    removeNote: removeNote
 }
