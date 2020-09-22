@@ -18,13 +18,26 @@ const addNote = function(title, body)  {
             body: body
         })
         saveNotes(notes)
+        console.log(chalk.green.bold('Note saved.'))
     } else {
         console.log(chalk.red.bold('Error: Note title already taken'))
     }
 }
 
 const removeNote = function(title) {
-    console.log('Note to be removed: ' + title)
+    // console.log('Note to be removed: ' + title)
+    const notes = loadNotes()
+
+    const newNotes = notes.filter(function(note) {
+        return title !== note.title
+    })
+
+    if(newNotes.length === 0) {
+        console.log(chalk.red.bold('Error: Note not found.'))
+    } else {        
+        saveNotes(newNotes)
+        console.log(chalk.bgRed.green.bold('Note removed'))
+    }
 }
 
 const saveNotes = function(notes) {
