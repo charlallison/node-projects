@@ -114,5 +114,5 @@ dist
 # personal files/directories
 notes.json
 playground/
-
+.idea/
 # End of https://www.toptal.com/developers/gitignore/api/node

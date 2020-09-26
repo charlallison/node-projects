@@ -1,35 +1,24 @@
-const request = require('request')
+const geocode = require("./utils/geocode.js")
+const forecast = require("./utils/forecast");
 
-const url = "http://api.weatherstack.com/current?access_key=0edca9548dc1b35d7e24af3a318ec570&query=37.8267,-122.4233&units=f"
+if(process.argv[2] !== undefined) {
+    const location = process.argv[2]
+    geocode(location, (error, res) => {
+        if (error) {
+            return console.log('error: ' + error)
+        }
+        // console.log('error: ' + error)
+        // console.log('response: ' + JSON.stringify(response))
 
-request({url:url, json:true}, (error, response) => {
+        forecast(res.latitude, res.longitude, (error, data) => {
+            if (error) {
+                return console.log('error: ' + error)
+            }
 
-    if(error) {
-        console.log("Unable to connect to weather service.")
-    } else if(response.body.error) {
-        console.log('Cannot find location')
-    } else {
-        const current = response.body.current;
-        console.log(current.weather_descriptions[0] + '- It is currently '+ current.temperature + ' degrees out. It feels like '+ current.feelslike + ' degrees out.')
-    }
-})
-
-// Geocoding
-// Address 
-
-// using api.mapbox
-const geocodeURL = "https://api.mapbox.com/geocoding/v5/mapbox.places/Los%20Angeles.json?access_token=pk.eyJ1Ijoic29wcmlueWUiLCJhIjoiY2tmZTF6NW90MDBueTJ0dDlsZDJtY2kxdiJ9.tNaz26dGAv8iNB5loCnkgg&limit=1"
-
-request({url: geocodeURL, json:true}, (err, res) => {
-    
-    if(err) {
-        console.log('Unable to connect to Geocoding service.')
-    } else if(res.body.error) {
-        console.log('Cannot find location')
-    } else if(res.body.features.length === 0) {
-        console.log('Cannot find location, please try again.')
-    } else {
-        console.log('Lat: ' + res.body.features[0].center[1])
-        console.log('Long: ' + res.body.features[0].center[0])
-    }
-})
+            console.log(res.location)
+            console.log(data)
+        })
+    })
+} else {
+    console.log("Please provide an address.")
+}
