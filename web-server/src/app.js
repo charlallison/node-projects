@@ -7,10 +7,9 @@ const forecast = require('./utils/forecast')
 const app = express()
 const title = 'Weather App'
 const author = 'Charles'
+const port = 3000
 
-const props = {
-    title, author
-}
+const props = { title, author }
 
 // Define paths for express config
 const viewsPath = path.join(__dirname, '../templates/views')
@@ -27,10 +26,12 @@ app.use(express.static(publicDirPath))
 
 // setup app routes
 app.get('', (req, res) => res.render('index', props))
-app.get('/about', (req, res) => res.render('about', props) )
-app.get('/help', (req, res) => res.render('help', props) )
+app.get('/about', (req, res) => res.render('about', props))
+app.get('/help', (req, res) => res.render('help', props))
 
 app.get('/weather', (req, res) => {
+    const address = req.query.address
+
     if(!req.query.address) {
         return res.send({error: 'You must provide an address'})
     }
@@ -40,44 +41,31 @@ app.get('/weather', (req, res) => {
             return res.send({error: error})
         }
 
-        forecast(latitude, longitude, (error, data) => {
+        forecast(latitude, longitude, (error, forecast) => {
             if (error) {
                 return res.send({error: error})
             }
 
-            res.send({location, data})
+            res.send({location, forecast, address})
         })
     })
 })
 
-app.get('/products', (req, res) => {
-    if(!req.query.search) {
-        return res.send({
-            error: 'You must provide a search term'
-        })
-    }
-    res.send({
-        products: []
-    })
-})  
-
 //sub pages
-app.get('/help/*', (req, res) => {
+app.get('/help/*', (req, res) =>
     res.render('404', {
         errorMessage: 'Help Article not found',
         author, title: '404'
     })
-})
+)
 
 // this has to come last given the rendering behaviour of express
-app.get('*', (req, res) => {
+app.get('*', (req, res) =>
     res.render('404', {
         errorMessage: 'Page not found',
         author, title: '404'
     })
-})
+)
 
 // server start
-app.listen(3000, () => {
-    console.log('Server up and running on port 3000')
-})
+app.listen(port, _ => console.log(`Server up and running on port ${port}`))
