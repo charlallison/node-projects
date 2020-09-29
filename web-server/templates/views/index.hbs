@@ -3,15 +3,25 @@
 <html>
 <head>
     <link rel="stylesheet" href="/css/style.css">
-    <script src="/js/script.js"></script>
     <title>Home - {{title}}</title>
 </head>
 <body>
 <div class="main-content">
     {{>header }}
 
-    <p>This paragraph contains a portion of the website.</p>
+    <p>Use this site to get your weather report.</p>
+
+     <form>
+         <label>
+             <input placeholder="location">
+         </label>
+         <button>Search</button>
+     </form>
+
+    <p id="message-1"></p>
+    <p id="message-2"></p>
 </div>
 {{>footer }}
+<script src="/js/script.js"></script>
 </body>
 </html>

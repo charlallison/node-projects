@@ -1,7 +1,7 @@
 {
   "name": "web-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "Simple weather app built on Node JS",
   "main": "index.js",
   "dependencies": {
     "express": "^4.17.1",
@@ -10,9 +10,9 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/app.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Charles",
   "license": "ISC"
 }
