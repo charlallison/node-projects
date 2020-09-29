@@ -115,4 +115,7 @@ dist
 notes.json
 playground/
 .idea/
+
+notes-app/
+weather-app/
 # End of https://www.toptal.com/developers/gitignore/api/node
