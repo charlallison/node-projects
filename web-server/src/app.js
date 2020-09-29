@@ -7,7 +7,7 @@ const forecast = require('./utils/forecast')
 const app = express()
 const title = 'Weather App'
 const author = 'Charles'
-const port = 3000
+const port = process.env.PORT || 3000
 
 const props = { title, author }
 
@@ -36,7 +36,7 @@ app.get('/weather', (req, res) => {
         return res.send({error: 'You must provide an address'})
     }
 
-    geocode(req.query.address, (error, {latitude, longitude, location}) => {
+    geocode(req.query.address, (error, {latitude, longitude, location} = {}) => {
         if (error) {
             return res.send({error: error})
         }

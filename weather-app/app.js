@@ -2,7 +2,7 @@ const geocode = require("./utils/geocode.js")
 const forecast = require("./utils/forecast");
 
 if(process.argv[2] !== undefined) {
-    const location = process.argv[2]
+    let location = process.argv[2]
     geocode(location, (error, {latitude, longitude, location}) => {
         if (error) {
             return console.log('error: ' + error)
