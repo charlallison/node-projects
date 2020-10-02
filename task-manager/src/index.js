@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express();
+const router = express.Router()
 const port = process.env.PORT || 3000
 
 // no function is required in the file from mongoose.js but this ensures that the file is loaded
@@ -11,6 +12,9 @@ const Task = require('./models/task')
 
 // automatically convert request body to json object
 app.use(express.json())
+
+// register router with app.
+app.use(router)
 
 app.post('/users', async (req, res) => {
     const user = new User(req.body)
@@ -76,7 +80,75 @@ app.get('/tasks/:id', async (req,res) => {
     }
 })
 
+app.patch('/users/:id', async (req, res) => {
+    let requestFields = Object.keys(req.body)
+    let updatableFields = ['name', 'email', 'password', 'age']
+    let isUpdateAllowed = requestFields.every(field =>  updatableFields.includes(field))
 
+    if(!isUpdateAllowed){
+        return res.status(400).send({message: 'Invalid updates!'})
+    }
+
+    try{
+        const user = await User.findByIdAndUpdate(req.params.id, req.body, {
+            new: true, runValidators: true, useFindAndModify: false
+        })
+        if(!user) {
+            return res.status(404).send({'message': 'user not found'})
+        }
+        res.status(200).send(user)
+    }catch(error) {
+        res.status(500).send({'error': error})
+    }
+})
+
+app.patch('/tasks/:id', async (req, res) => {
+    let requestFields = Object.keys(req.body)
+    let updatableFields = ['description', 'completed']
+    let isUpdateAllowed = requestFields.every(field => updatableFields.includes(field))
+
+    if(!isUpdateAllowed){
+        return res.status(400).send({message: 'Invalid updates!'})
+    }
+
+    try{
+        const task = await Task.findByIdAndUpdate(req.params.id, req.body, {
+            new: true, runValidators: true, useFindAndModify: false
+        })
+        if(!task) {
+            return res.status(404).send({'message': 'task not found'})
+        }
+        res.status(200).send(task)
+    }catch(error) {
+        res.status(500).send({error: error})
+    }
+})
+
+app.delete('/tasks/:id', async (req, res) => {
+    try {
+        let task = await Task.findByIdAndDelete(req.params.id)
+
+        if(!task) {
+            return res.status(404).send({message: 'task not found'})
+        }
+        res.status(200).send({})
+    }catch (error) {
+        res.status(500).send({error: error})
+    }
+})
+
+app.delete('/users/:id', async (req, res) => {
+    try {
+        await User.findByIdAndDelete(req.params.id)
+
+        if(!task) {
+            return res.status(404).send({message: 'user not found'})
+        }
+        res.status(200).send({})
+    }catch (error) {
+        res.status(500).send({error: error})
+    }
+})
 
 
 
