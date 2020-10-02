@@ -30,7 +30,7 @@ app.get('/users/:id', (req, res) => {
     User.findById(req.params.id)
         .then(result => {
             if(!result) {
-                return res.status(404).send({'error' : 'user not found'})
+                return res.status(404).send({})
             }
             res.status(200).send(result)
         })
@@ -56,7 +56,12 @@ app.get('/tasks', (req, res) => {
 
 app.get('/tasks/:id', (req,res) => {
     Task.findById(req.params.id)
-        .then(result => res.status(200).send(result))
+        .then(result => {
+            if(!result) {
+                return res.status(404).send({})
+            }
+            res.status(200).send(result)
+        })
         .catch(error => res.status(500).send({'error': error}))
 })
 
