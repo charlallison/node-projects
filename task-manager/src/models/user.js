@@ -1,8 +1,10 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
+// const bcrypt = require('bcryptjs')
+const PASSWORD_SALT = 8;
 
-// create user model
-const User = mongoose.model('User', {
+// create user schema
+const schema = new mongoose.Schema( {
     name: {
         type: String,
         required: true
@@ -36,5 +38,19 @@ const User = mongoose.model('User', {
         }
     }
 })
+
+// this is a middleware for the user model.
+// this particular one is run before save is called on a created model.
+schema.pre('save', async function(next) {
+    const user = this
+
+    if(user.isModified('password')) {
+        user.password = bcrypt.hash(user.password, PASSWORD_SALT)
+    }
+
+    next()
+})
+// create user model
+const User = mongoose.model('User', schema)
 
 module.exports = User
