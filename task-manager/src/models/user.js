@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const Task = require('../models/task')
 const PASSWORD_SALT = 8;
 
 // create user schema
@@ -47,6 +48,12 @@ const schema = new mongoose.Schema( {
             required: true
         }
     }]
+})
+
+schema.virtual('tasks', {
+    ref: 'Task',
+    localField: '_id',
+    foreignField: 'author'
 })
 
 // class method
@@ -96,6 +103,14 @@ schema.pre('save', async function(next) {
 
     next()
 })
+
+// delete user's tasks when user is removed
+schema.pre('remove', async function(next) {
+    const user = this
+    await Task.deleteMany({author: user._id})
+    next()
+})
+
 // create user model
 const User = mongoose.model('User', schema)
 

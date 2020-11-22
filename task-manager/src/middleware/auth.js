@@ -6,7 +6,7 @@ const auth = async (req, res, next) => {
         let token = req.header('Authorization').replace('Bearer ', '')
         let payload = jwt.verify(token, 'This is the user stuff')
 
-        let user = await User.findById({_id: payload._id, 'tokens.token': token})
+        let user = await User.findOne({_id: payload._id, 'tokens.token': token})
 
         if(!user) {
             throw new Error("please authenticate")
