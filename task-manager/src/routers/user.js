@@ -1,29 +1,15 @@
 const express = require('express')
 const router = new express.Router()
+const auth = require('../middleware/auth')
 const User = require('../models/user')
 
-
-router.post('/users', async (req, res) => {
-    const user = new User(req.body)
-
-    try {
-        await user.save()
-        res.status(201).send(user)
-    }catch (error) {
-        res.status(500).send({ 'error' : error })
-    }
+// user profile
+router.get('/users/me', auth, async (req, res) => {
+    res.send(req.user)
 })
 
-router.get('/users', async (req, res) => {
-    try {
-        const result = await User.find({})
-        res.status(200).send(result)
-    }catch (error) {
-        res.status(500).send({'error': error})
-    }
-})
-
-router.get('/users/:id', async (req, res) => {
+// not expected to be functional/public
+router.get('/users/:id', auth, async (req, res) => {
     try {
         const user = await User.findById(req.params.id)
         if(!user) {
@@ -35,7 +21,52 @@ router.get('/users/:id', async (req, res) => {
     }
 })
 
-router.patch('/users/:id', async (req, res) => {
+// sign up
+router.post('/users', async (req, res) => {
+    const user = new User(req.body)
+
+    try {
+        await user.save()
+        const token = await user.generateAuthToken()
+        res.status(201).send({user, token})
+    }catch (error) {
+        res.status(500).send({ 'error' : error })
+    }
+})
+
+// login
+router.post('/users/login', async (req, res) => {
+    try {
+        const user = await User.findByCredentials(req.body.email, req.body.password)
+        const authToken = await user.generateAuthToken()
+        return res.status(200).send({ user, authToken })
+    }catch (error) {
+        res.status(400).send({message: error.message})
+    }
+})
+
+router.post('/users/logout', auth, async(req, res) => {
+    try {
+        req.user.tokens = req.user.tokens.filter(item => {
+            return item.token !== req.token
+        })
+        req.user.save()
+    }catch (error) {
+        res.status(500).send(error)
+    }
+})
+
+router.post('/users/logoutAll', auth, async (req, res) => {
+    try {
+        req.user.tokens = [];
+        await req.user.save();
+        res.send()
+    }catch(error) {
+        res.status(500).send(error)
+    }
+})
+
+router.patch('/users/me', auth, async (req, res) => {
     let requestFields = Object.keys(req.body)
     let updatableFields = ['name', 'email', 'password', 'age']
     let isUpdateAllowed = requestFields.every(field =>  updatableFields.includes(field))
@@ -45,27 +76,19 @@ router.patch('/users/:id', async (req, res) => {
     }
 
     try{
-        const user = await User.findById(req.params.id)
-        requestFields.forEach(field => user[field] = req.body[field])
-        await user.save()
+        requestFields.forEach(field => req.user[field] = req.body[field])
+        await req.user.save()
 
-        if(!user) {
-            return res.status(404).send({'message': 'user not found'})
-        }
-        res.status(200).send(user)
+        res.send(req.user)
     }catch(error) {
         res.status(500).send({'error': error})
     }
 })
 
-router.delete('/users/:id', async (req, res) => {
+router.delete('/users/me', auth, async (req, res) => {
     try {
-        let user = await User.findByIdAndDelete(req.params.id)
-
-        if(!user) {
-            return res.status(404).send({message: 'user not found'})
-        }
-        res.status(200).send({})
+        await req.user.remove()
+        res.status(200).send(req.user)
     }catch (error) {
         res.status(500).send({error: error})
     }
