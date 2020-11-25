@@ -3,6 +3,7 @@ const router = new express.Router()
 const auth = require('../middleware/auth')
 const User = require('../models/user')
 const multer = require('multer')
+const sharp = require('sharp')
 
 // user profile
 router.get('/users/me', auth, async (req, res) => {
@@ -87,7 +88,8 @@ const upload = multer({
 // method single(...)exists in multer and in responsible for uploading
 // file to destination point.
 router.post('/users/me/avatar', auth, upload.single('file'), async (req, res) => {
-    req.user.avatar = req.file.buffer
+    // req.user.avatar = req.file.buffer // get file from multer
+    req.user.avatar = await sharp(req.file.buffer).resize({width: 250, height: 250}).png().toBuffer()
     await req.user.save()
     res.send()
 }, (error, req, res, next) => {
