@@ -2,6 +2,7 @@ const express = require('express')
 const router = new express.Router()
 const auth = require('../middleware/auth')
 const User = require('../models/user')
+const multer = require('multer')
 
 // user profile
 router.get('/users/me', auth, async (req, res) => {
@@ -66,6 +67,33 @@ router.post('/users/logoutAll', auth, async (req, res) => {
     }
 })
 
+// upload function
+const upload = multer({
+    // dest: 'avatar',
+    limits: {
+        fileSize: 1000000 // in bytes 1mb
+    },
+    // file: file param contains every information about the file being uploaded.
+    fileFilter(req, file, callback) {
+        if(!file.originalname.match(/\.(jpg|jpeg|png)$/)) { // file must be a word document.
+            return callback(new Error("Please upload an image file."))
+        }
+
+        callback(undefined, true) // - for successful filter operation
+    }
+})
+
+// upload function used as a middleware
+// method single(...)exists in multer and in responsible for uploading
+// file to destination point.
+router.post('/users/me/avatar', auth, upload.single('file'), async (req, res) => {
+    req.user.avatar = req.file.buffer
+    await req.user.save()
+    res.send()
+}, (error, req, res, next) => {
+    res.status(400).send({error: error.message})
+})
+
 router.patch('/users/me', auth, async (req, res) => {
     let requestFields = Object.keys(req.body)
     let updatableFields = ['name', 'email', 'password', 'age']
@@ -92,6 +120,12 @@ router.delete('/users/me', auth, async (req, res) => {
     }catch (error) {
         res.status(500).send({error: error})
     }
+})
+
+router.delete('/users/me/avatar', auth, async (req, res) => {
+    req.user.avatar = undefined
+    req.user.save();
+    res.send()
 })
 
 module.exports = router
