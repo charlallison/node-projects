@@ -75,6 +75,7 @@ typings/
 
 # dotenv environment variables file
 task-manager/src/config/.env
+task-manager/src/config/test.env
 .env.test
 
 # parcel-bundler cache (https://parceljs.org/)
